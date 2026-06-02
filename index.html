@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>基金从业章节刷题</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">2026 基金从业</p>
+          <h1>章节刷题</h1>
+        </div>
+        <button class="icon-button" id="resetDataBtn" type="button" title="清空练习记录" aria-label="清空练习记录">
+          ↺
+        </button>
+      </header>
+
+      <main>
+        <section class="view active" id="view-subjects" aria-labelledby="subjectsTitle">
+          <div class="section-heading">
+            <h2 id="subjectsTitle">选择科目</h2>
+            <p>按章节练习，错题自动沉淀，分析薄弱考点。</p>
+          </div>
+          <div class="storage-note">
+            练习记录保存在当前浏览器，换设备不会自动同步。
+          </div>
+          <div class="subject-grid" id="subjectGrid"></div>
+        </section>
+
+        <section class="view" id="view-chapters" aria-labelledby="chaptersTitle">
+          <div class="section-heading row-heading">
+            <div>
+              <p class="eyebrow" id="chapterSubjectMeta"></p>
+              <h2 id="chaptersTitle">章节练习</h2>
+            </div>
+            <button class="ghost-button" id="backToSubjects" type="button">返回</button>
+          </div>
+          <div class="mode-panel">
+            <span>练习模式</span>
+            <div class="segmented" role="group" aria-label="练习模式">
+              <button class="active" data-mode="ordered" type="button">顺序</button>
+              <button data-mode="random" type="button">随机</button>
+            </div>
+          </div>
+          <div class="chapter-list" id="chapterList"></div>
+        </section>
+
+        <section class="view" id="view-practice" aria-labelledby="practiceTitle">
+          <div class="practice-head">
+            <button class="ghost-button" id="leavePractice" type="button">退出</button>
+            <div class="progress-wrap">
+              <div class="progress-meta">
+                <span id="practiceTitle">题目</span>
+                <span id="questionCounter"></span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-bar" id="progressBar"></div>
+              </div>
+            </div>
+          </div>
+          <article class="question-panel">
+            <div class="question-tags">
+              <span id="questionDifficulty"></span>
+              <span id="questionPoint"></span>
+            </div>
+            <h2 id="questionText"></h2>
+            <div class="options" id="optionList"></div>
+            <div class="answer-panel" id="answerPanel" hidden>
+              <div class="answer-status" id="answerStatus"></div>
+              <p id="answerExplain"></p>
+              <p class="mistake-note" id="mistakeNote"></p>
+              <label class="mistake-reason" id="mistakeReasonWrap">
+                <span>错因标签</span>
+                <select id="mistakeReason">
+                  <option value="没记住">没记住</option>
+                  <option value="概念混淆">概念混淆</option>
+                  <option value="题干陷阱">题干陷阱</option>
+                  <option value="法规/流程不熟">法规/流程不熟</option>
+                </select>
+              </label>
+            </div>
+            <div class="practice-actions">
+              <button class="secondary-button" id="prevQuestion" type="button">上一题</button>
+              <button class="primary-button" id="nextQuestion" type="button">下一题</button>
+            </div>
+          </article>
+        </section>
+
+        <section class="view" id="view-result" aria-labelledby="resultTitle">
+          <div class="section-heading">
+            <p class="eyebrow">本次练习</p>
+            <h2 id="resultTitle">练习结果</h2>
+          </div>
+          <div class="result-grid" id="resultGrid"></div>
+          <div class="recommend-panel" id="recommendPanel"></div>
+          <div class="result-actions">
+            <button class="primary-button" id="retryWrongBtn" type="button">复刷本次错题</button>
+            <button class="secondary-button" id="backToChaptersFromResult" type="button">回到章节</button>
+          </div>
+        </section>
+
+        <section class="view" id="view-wrongbook" aria-labelledby="wrongbookTitle">
+          <div class="section-heading">
+            <p class="eyebrow">错题复盘</p>
+            <h2 id="wrongbookTitle">错题本</h2>
+          </div>
+          <div class="filter-bar">
+            <select id="wrongSubjectFilter" aria-label="科目筛选"></select>
+            <select id="wrongChapterFilter" aria-label="章节筛选"></select>
+            <select id="wrongTypeFilter" aria-label="错题类型筛选">
+              <option value="all">全部错题</option>
+              <option value="focus">重点错题</option>
+              <option value="high">高频错题</option>
+              <option value="mastered">已掌握</option>
+            </select>
+          </div>
+          <div class="wrong-list" id="wrongList"></div>
+        </section>
+
+        <section class="view" id="view-analysis" aria-labelledby="analysisTitle">
+          <div class="section-heading">
+            <p class="eyebrow">学习数据</p>
+            <h2 id="analysisTitle">学习分析</h2>
+          </div>
+          <div class="analysis-summary" id="analysisSummary"></div>
+          <div class="analysis-list" id="analysisList"></div>
+        </section>
+      </main>
+
+      <nav class="bottom-nav" aria-label="主导航">
+        <button class="active" data-nav="subjects" type="button"><span>⌂</span>科目</button>
+        <button data-nav="wrongbook" type="button"><span>!</span>错题</button>
+        <button data-nav="analysis" type="button"><span>▤</span>分析</button>
+      </nav>
+    </div>
+
+    <script src="./data-full.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
