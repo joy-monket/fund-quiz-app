@@ -50,36 +50,36 @@
   };
 
   const directStemTemplates = [
-    ({ point }) => `下列哪一项最符合「${point}」的基本含义？`,
-    ({ point }) => `关于「${point}」，下列理解正确的是？`,
-    ({ point }) => `学习「${point}」时，最应把握的核心是？`,
-    ({ point }) => `下列哪项属于「${point}」通常考查的内容？`,
-    ({ point }) => `从考试角度看，「${point}」最可能要求考生掌握什么？`,
-    ({ point }) => `下列关于「${point}」的表述，哪一项更准确？`,
-    ({ point }) => `围绕「${point}」，下列哪项属于正确判断？`,
-    ({ point }) => `下列哪一项与「${point}」的制度定位最一致？`
+    ({ point }) => `${point}这一考点最核心的判断是？`,
+    ({ point }) => `考查${point}时，哪一项表述更准确？`,
+    ({ point }) => `${point}在教材体系中的重点更接近哪一项？`,
+    ({ point }) => `下列哪项属于${point}需要掌握的内容？`,
+    ({ point }) => `做${point}相关题目时，首先应抓住什么？`,
+    ({ point }) => `${point}与相邻概念相比，关键差异通常是什么？`,
+    ({ point }) => `下列哪一项更符合${point}的制度要求？`,
+    ({ point }) => `${point}对应的正确理解是哪一项？`
   ];
 
   const scenarioStemTemplates = [
-    ({ point }) => `某基金机构办理与「${point}」有关的业务时，较合规的做法是？`,
-    ({ point }) => `在「${point}」相关场景中，从业人员首先应避免哪类做法？`,
-    ({ point }) => `客户询问「${point}」相关安排时，销售人员的正确回应是？`,
-    ({ point }) => `某管理人在落实「${point}」要求时，下列做法更恰当的是？`,
-    ({ point }) => `如果业务流程涉及「${point}」，下列处理方式更符合规范的是？`,
-    ({ point }) => `围绕「${point}」发生争议时，判断合规性的关键依据是？`,
-    ({ point }) => `某产品运作中涉及「${point}」，管理人应重点做到什么？`,
-    ({ point }) => `在投资者保护视角下，「${point}」相关业务更应强调什么？`
+    ({ point }) => `业务人员处理${point}相关事项时，更合规的做法是？`,
+    ({ point }) => `涉及${point}的实际业务中，哪类行为最应避免？`,
+    ({ point }) => `投资者追问${point}时，销售人员较恰当的回应是？`,
+    ({ point }) => `管理人落实${point}要求时，下列做法更稳妥的是？`,
+    ({ point }) => `业务流程触及${point}时，哪种处理更符合规范？`,
+    ({ point }) => `${point}发生争议时，判断合规性的关键依据是？`,
+    ({ point }) => `产品运作涉及${point}时，管理人应重点做到什么？`,
+    ({ point }) => `从投资者保护角度看，${point}更应强调什么？`
   ];
 
   const errorStemTemplates = [
-    ({ point }) => `关于「${point}」，下列哪一项说法错误？`,
-    ({ point }) => `下列哪项最可能违反「${point}」的要求？`,
-    ({ point }) => `围绕「${point}」，哪一项属于常见误区？`,
-    ({ point }) => `下列哪种表述最容易造成对「${point}」的误解？`,
-    ({ point }) => `考查「${point}」时，哪个选项通常应被排除？`,
-    ({ point }) => `下列哪项与「${point}」的正确要求相冲突？`,
-    ({ point }) => `判断「${point}」相关选项时，最需要警惕哪种说法？`,
-    ({ point }) => `下列关于「${point}」的理解，哪一项不恰当？`
+    ({ point }) => `${point}相关表述中，哪一项是错误的？`,
+    ({ point }) => `下列哪项最可能违反${point}的要求？`,
+    ({ point }) => `围绕${point}，哪一项属于常见误区？`,
+    ({ point }) => `哪种说法最容易造成对${point}的误解？`,
+    ({ point }) => `考查${point}时，哪个选项通常应被排除？`,
+    ({ point }) => `下列哪项与${point}的正确要求相冲突？`,
+    ({ point }) => `判断${point}相关选项时，最需要警惕哪种说法？`,
+    ({ point }) => `下列对${point}的理解，哪一项不恰当？`
   ];
 
   const directCorrectTemplates = [
@@ -137,14 +137,70 @@
       return acc;
     }, new Map());
     const buckets = [...groups.values()];
-    const maxLength = Math.max(...buckets.map((bucket) => bucket.length));
-    const interleaved = [];
-    for (let round = 0; round < maxLength; round += 1) {
-      for (const bucket of buckets) {
-        if (bucket[round]) interleaved.push(bucket[round]);
+    const remaining = buckets.map((bucket) => bucket.length);
+    const sequence = [];
+    const total = buckets.reduce((sum, bucket) => sum + bucket.length, 0);
+    const minUniqueByWindowSize = { 3: 2, 4: 3, 5: 4, 6: 4 };
+    const memo = new Set();
+
+    const canAdd = (bucketIndex) => {
+      if (remaining[bucketIndex] <= 0) return false;
+      if (sequence.at(-1) === bucketIndex) return false;
+      const next = sequence.concat(bucketIndex);
+      for (const size of [3, 4, 5, 6]) {
+        if (next.length >= size) {
+          const uniqueInWindow = new Set(next.slice(-size)).size;
+          const expected = Math.min(minUniqueByWindowSize[size], buckets.length);
+          if (uniqueInWindow < expected) return false;
+        }
+      }
+      if (next.length % buckets.length === 0 && next.length >= buckets.length * 2) {
+        const currentRound = next.slice(-buckets.length).join("|");
+        const previousRound = next.slice(-buckets.length * 2, -buckets.length).join("|");
+        if (currentRound === previousRound) return false;
+      }
+      return true;
+    };
+
+    const search = () => {
+      if (sequence.length === total) return true;
+      const memoKey = `${remaining.join(",")}|${sequence.slice(-6).join(",")}`;
+      if (memo.has(memoKey)) return false;
+
+      const candidates = [];
+      for (let index = 0; index < buckets.length; index += 1) {
+        if (!canAdd(index)) continue;
+        const recentCount = sequence.slice(-5).filter((item) => item === index).length;
+        const lastIndex = sequence.lastIndexOf(index);
+        const distance = lastIndex === -1 ? 99 : sequence.length - lastIndex;
+        const score = remaining[index] * 20 + distance * 8 - recentCount * 100 + ((index * 37) % 11);
+        candidates.push([index, score]);
+      }
+
+      candidates.sort((a, b) => b[1] - a[1]);
+
+      for (const [index] of candidates) {
+        sequence.push(index);
+        remaining[index] -= 1;
+        if (search()) return true;
+        remaining[index] += 1;
+        sequence.pop();
+      }
+
+      memo.add(memoKey);
+      return false;
+    };
+
+    if (!search()) {
+      for (let round = 0; round < Math.max(...buckets.map((bucket) => bucket.length)); round += 1) {
+        for (let index = 0; index < buckets.length; index += 1) {
+          if (buckets[index][round]) sequence.push(index);
+        }
       }
     }
-    return interleaved;
+
+    const cursors = buckets.map(() => 0);
+    return sequence.map((bucketIndex) => buckets[bucketIndex][cursors[bucketIndex]++]);
   }
 
   const customQuestionBanks = {

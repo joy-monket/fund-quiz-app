@@ -81,6 +81,30 @@ https://joy-monket.github.io/fund-quiz-app/?v=20260603-v3
 
 该版本使用新的本地记录空间 `fundQuizProgress:20260603-v3`。
 
+章节内轮次打散版本链接：
+
+```text
+https://joy-monket.github.io/fund-quiz-app/?v=20260603-v4
+```
+
+该版本使用新的本地记录空间 `fundQuizProgress:20260603-v4`。
+
+题干去模板腔版本链接：
+
+```text
+https://joy-monket.github.io/fund-quiz-app/?v=20260603-v5
+```
+
+该版本使用新的本地记录空间 `fundQuizProgress:20260603-v5`。
+
+全章贪心分布排序版本链接：
+
+```text
+https://joy-monket.github.io/fund-quiz-app/?v=20260603-v6
+```
+
+该版本使用新的本地记录空间 `fundQuizProgress:20260603-v6`。
+
 ## 题库说明
 
 题库文件是 `data-full.js`。
@@ -100,4 +124,4 @@ https://joy-monket.github.io/fund-quiz-app/?v=20260603-v3
 node qa-check.js
 ```
 
-检查内容包括：重复题干、重复题目 ID、答案索引、空字段、相邻考点重复，以及任意连续 3-6 题是否被少数考点占满。
+检查内容包括：重复题干、重复题目 ID、答案索引、空字段、相邻考点重复、任意连续 3-6 题是否被少数考点占满、整轮考点顺序是否重复，以及模板腔题干比例。

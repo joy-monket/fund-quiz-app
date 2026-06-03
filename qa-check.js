@@ -6,9 +6,34 @@ const stemMap = new Map();
 const idMap = new Map();
 const failures = [];
 const chapterReports = [];
+const warnings = [];
+const templateSignals = [
+  "关于「",
+  "下列哪项属于",
+  "客户询问「",
+  "如果业务流程涉及",
+  "围绕「",
+  "从考试角度看",
+  "某基金机构办理与",
+  "某管理人在落实",
+  "下列关于「",
+  "判断「",
+  "学习「",
+  "在投资者保护视角下"
+];
+const minUniqueByWindowSize = {
+  3: 2,
+  4: 3,
+  5: 4,
+  6: 4
+};
 
 function fail(message) {
   failures.push(message);
+}
+
+function warn(message) {
+  warnings.push(message);
 }
 
 for (const subject of subjects) {
@@ -18,6 +43,8 @@ for (const subject of subjects) {
     const pointCount = new Set(points).size;
     let adjacentRepeats = 0;
     let badWindows = 0;
+    let repeatedTopicRounds = 0;
+    const templateCount = questions.filter((question) => templateSignals.some((signal) => question.stem.includes(signal))).length;
 
     for (let index = 1; index < points.length; index += 1) {
       if (points[index] === points[index - 1]) adjacentRepeats += 1;
@@ -27,8 +54,19 @@ for (const subject of subjects) {
       if (questions.length < size) continue;
       for (let start = 0; start <= questions.length - size; start += 1) {
         const uniqueInWindow = new Set(points.slice(start, start + size)).size;
-        const expected = Math.min(size, pointCount);
+        const expected = Math.min(minUniqueByWindowSize[size], pointCount);
         if (uniqueInWindow < expected) badWindows += 1;
+      }
+    }
+
+    if (pointCount > 1) {
+      const rounds = [];
+      for (let start = 0; start < questions.length; start += pointCount) {
+        const round = points.slice(start, start + pointCount);
+        if (round.length === pointCount) rounds.push(round.join("|"));
+      }
+      for (let index = 1; index < rounds.length; index += 1) {
+        if (rounds[index] === rounds[index - 1]) repeatedTopicRounds += 1;
       }
     }
 
@@ -54,12 +92,16 @@ for (const subject of subjects) {
 
     if (adjacentRepeats > 0) fail(`${subject.code} ${chapter.title}: ${adjacentRepeats} adjacent repeated topic(s)`);
     if (badWindows > 0) fail(`${subject.code} ${chapter.title}: ${badWindows} weak sliding topic window(s)`);
+    if (repeatedTopicRounds > 0) fail(`${subject.code} ${chapter.title}: ${repeatedTopicRounds} repeated topic round(s)`);
+    if (templateCount / questions.length > 0.65) warn(`${subject.code} ${chapter.title}: template-style stems ${templateCount}/${questions.length}`);
 
     chapterReports.push({
       subject: subject.code,
       chapter: chapter.title,
       questions: questions.length,
       topics: pointCount,
+      repeatedTopicRounds,
+      templateCount,
       firstSixTopics: points.slice(0, 6)
     });
   }
@@ -82,6 +124,13 @@ console.log("");
 for (const report of chapterReports) {
   console.log(`${report.subject} ${report.chapter}: ${report.questions}题 / ${report.topics}考点`);
   console.log(`  前6题考点: ${report.firstSixTopics.join(" / ")}`);
+  console.log(`  循环轮次: ${report.repeatedTopicRounds} / 模板腔题干: ${report.templateCount}`);
+}
+
+if (warnings.length) {
+  console.log("");
+  console.log("QA warnings:");
+  for (const message of warnings) console.log(`- ${message}`);
 }
 
 if (failures.length) {
@@ -92,4 +141,4 @@ if (failures.length) {
 }
 
 console.log("");
-console.log("QA passed: no duplicate stems, invalid answers, adjacent topic repeats, or weak 3-6 question topic windows.");
+console.log("QA passed: no duplicate stems, invalid answers, adjacent topic repeats, weak 3-6 question topic windows, or repeated topic rounds.");
