@@ -73,6 +73,14 @@ https://joy-monket.github.io/fund-quiz-app/?v=20260603-v2
 
 该版本使用新的本地记录空间 `fundQuizProgress:20260603-v2`。
 
+章节内考点交错排序版本链接：
+
+```text
+https://joy-monket.github.io/fund-quiz-app/?v=20260603-v3
+```
+
+该版本使用新的本地记录空间 `fundQuizProgress:20260603-v3`。
+
 ## 题库说明
 
 题库文件是 `data-full.js`。

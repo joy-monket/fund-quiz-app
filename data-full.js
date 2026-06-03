@@ -130,6 +130,23 @@
     return { options, answer };
   };
 
+  function interleaveQuestionsByPoint(questions) {
+    const groups = questions.reduce((acc, question) => {
+      if (!acc.has(question.point)) acc.set(question.point, []);
+      acc.get(question.point).push(question);
+      return acc;
+    }, new Map());
+    const buckets = [...groups.values()];
+    const maxLength = Math.max(...buckets.map((bucket) => bucket.length));
+    const interleaved = [];
+    for (let round = 0; round < maxLength; round += 1) {
+      for (const bucket of buckets) {
+        if (bucket[round]) interleaved.push(bucket[round]);
+      }
+    }
+    return interleaved;
+  }
+
   const customQuestionBanks = {
     "s1-c1": [
       {
@@ -560,10 +577,12 @@
           id: `${subject.id}-c${chapterIndex}`,
           title: `第${chapterIndex}章 ${chapter.title}`,
           summary: chapter.summary,
-          questions: customQuestionBanks[`${subject.id}-c${chapterIndex}`] ||
-            chapter.sections.flatMap((section, sectionOffset) =>
-              makeQuestions(subject.id, chapterIndex, chapter.title, sectionOffset + 1, section)
-            )
+          questions: interleaveQuestionsByPoint(
+            customQuestionBanks[`${subject.id}-c${chapterIndex}`] ||
+              chapter.sections.flatMap((section, sectionOffset) =>
+                makeQuestions(subject.id, chapterIndex, chapter.title, sectionOffset + 1, section)
+              )
+          )
         };
       })
     };
