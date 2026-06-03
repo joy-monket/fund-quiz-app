@@ -105,6 +105,30 @@ https://joy-monket.github.io/fund-quiz-app/?v=20260603-v6
 
 该版本使用新的本地记录空间 `fundQuizProgress:20260603-v6`。
 
+考试题型混合版链接：
+
+```text
+https://joy-monket.github.io/fund-quiz-app/?v=20260603-v8
+```
+
+该版本加入普通单选、组合单选、材料题三类题型，使用新的本地记录空间 `fundQuizProgress:20260603-v8`。
+
+题型交错版链接：
+
+```text
+https://joy-monket.github.io/fund-quiz-app/?v=20260603-v9
+```
+
+该版本让章节前几题也混入普通单选、组合单选、材料题，使用新的本地记录空间 `fundQuizProgress:20260603-v9`。
+
+题型逐题交错版链接：
+
+```text
+https://joy-monket.github.io/fund-quiz-app/?v=20260603-v10
+```
+
+该版本让题型按普通单选、组合单选、材料题交错出现，使用新的本地记录空间 `fundQuizProgress:20260603-v10`。
+
 ## 题库说明
 
 题库文件是 `data-full.js`。

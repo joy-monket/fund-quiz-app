@@ -6,6 +6,7 @@ const stemMap = new Map();
 const idMap = new Map();
 const failures = [];
 const chapterReports = [];
+const typeCounts = new Map();
 const warnings = [];
 const templateSignals = [
   "关于「",
@@ -40,6 +41,7 @@ for (const subject of subjects) {
   for (const chapter of subject.chapters) {
     const questions = chapter.questions;
     const points = questions.map((question) => question.point);
+    const firstSixTypes = questions.slice(0, 6).map((question) => question.difficulty);
     const pointCount = new Set(points).size;
     let adjacentRepeats = 0;
     let badWindows = 0;
@@ -74,6 +76,7 @@ for (const subject of subjects) {
       if (!question.id || !question.point || !question.difficulty || !question.stem || !question.explanation || !question.trap) {
         fail(`${subject.code} ${chapter.title}: empty required field in ${question.id || "unknown id"}`);
       }
+      typeCounts.set(question.difficulty, (typeCounts.get(question.difficulty) || 0) + 1);
       if (!Array.isArray(question.options) || question.options.length !== 4) {
         fail(`${subject.code} ${chapter.title}: options length is not 4 in ${question.id}`);
       } else if (new Set(question.options).size !== 4) {
@@ -93,6 +96,13 @@ for (const subject of subjects) {
     if (adjacentRepeats > 0) fail(`${subject.code} ${chapter.title}: ${adjacentRepeats} adjacent repeated topic(s)`);
     if (badWindows > 0) fail(`${subject.code} ${chapter.title}: ${badWindows} weak sliding topic window(s)`);
     if (repeatedTopicRounds > 0) fail(`${subject.code} ${chapter.title}: ${repeatedTopicRounds} repeated topic round(s)`);
+    if (new Set(firstSixTypes).size < 3) fail(`${subject.code} ${chapter.title}: first six questions lack type variety`);
+    for (let index = 1; index < firstSixTypes.length; index += 1) {
+      if (firstSixTypes[index] === firstSixTypes[index - 1]) {
+        fail(`${subject.code} ${chapter.title}: adjacent repeated type in first six`);
+        break;
+      }
+    }
     if (templateCount / questions.length > 0.65) warn(`${subject.code} ${chapter.title}: template-style stems ${templateCount}/${questions.length}`);
 
     chapterReports.push({
@@ -102,6 +112,7 @@ for (const subject of subjects) {
       topics: pointCount,
       repeatedTopicRounds,
       templateCount,
+      firstSixTypes,
       firstSixTopics: points.slice(0, 6)
     });
   }
@@ -119,11 +130,13 @@ console.log(`Subjects: ${subjects.length}`);
 console.log(`Chapters: ${chapterReports.length}`);
 console.log(`Questions: ${[...idMap.keys()].length}`);
 console.log(`Unique stems: ${stemMap.size}`);
+console.log(`Types: ${[...typeCounts.entries()].map(([type, count]) => `${type}=${count}`).join(", ")}`);
 console.log("");
 
 for (const report of chapterReports) {
   console.log(`${report.subject} ${report.chapter}: ${report.questions}题 / ${report.topics}考点`);
   console.log(`  前6题考点: ${report.firstSixTopics.join(" / ")}`);
+  console.log(`  前6题型: ${report.firstSixTypes.join(" / ")}`);
   console.log(`  循环轮次: ${report.repeatedTopicRounds} / 模板腔题干: ${report.templateCount}`);
 }
 

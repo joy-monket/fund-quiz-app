@@ -130,13 +130,107 @@
     return { options, answer };
   };
 
+  const comboOptions = {
+    twoCorrect: ["Ⅰ、Ⅱ", "Ⅰ、Ⅲ", "Ⅱ、Ⅳ", "Ⅲ、Ⅳ"],
+    threeCorrect: ["Ⅰ、Ⅱ、Ⅲ", "Ⅰ、Ⅱ、Ⅳ", "Ⅰ、Ⅲ、Ⅳ", "Ⅱ、Ⅲ、Ⅳ"]
+  };
+
+  function makeComboQuestion({ id, point, base, level, seed, trap }) {
+    const useThree = seed % 2 === 0;
+    const statements = useThree
+      ? [
+          `Ⅰ. 应结合${base}判断该考点`,
+          "Ⅱ. 不得以销售便利为由省略必要程序",
+          "Ⅲ. 涉及投资者利益时应做好风险揭示和留痕",
+          "Ⅳ. 只要投资者签字，管理人即可承诺固定收益"
+        ]
+      : [
+          `Ⅰ. ${base}是判断该考点的重要依据`,
+          "Ⅱ. 相关主体应按职责边界履行义务",
+          "Ⅲ. 产品备案或登记等同于监管机构保证收益",
+          "Ⅳ. 投资者同意后即可不再进行信息披露"
+        ];
+    const options = useThree ? comboOptions.threeCorrect : comboOptions.twoCorrect;
+    return {
+      id,
+      point,
+      difficulty: "组合单选",
+      stem: `${point}相关说法，正确的有：\n${statements.join("\n")}`,
+      options,
+      answer: 0,
+      explanation: useThree
+        ? `Ⅰ、Ⅱ、Ⅲ正确。${point}通常从${base}、程序合规、风险揭示和记录留痕角度考查；Ⅳ属于保本保收益类错误表述。`
+        : `Ⅰ、Ⅱ正确。${point}要结合${base}和主体职责判断；Ⅲ、Ⅳ分别混淆监管背书和持续披露义务。`,
+      trap: trap || "组合题要逐项判断，特别警惕“备案等于背书”“签字即可免责”“承诺固定收益”等表述。"
+    };
+  }
+
+  function makeMaterialQuestion({ id, point, base, level, seed, correct, trap }) {
+    const cases = [
+      {
+        material: `某基金销售人员向投资者介绍产品时强调“该产品已完成备案，风险很低”，但未充分说明投资范围、费用和可能亏损情况。投资者随后要求确认该产品是否可以视为稳健保本产品。`,
+        stem: `${point}相关情形中，较准确的判断是？`,
+        correct: `应围绕${base}履行风险揭示和适当性要求，不得把备案理解为收益背书`
+      },
+      {
+        material: `某基金管理人在业务办理中发现流程材料不完整。业务部门认为投资者已经口头同意，可以先完成交易，后续再补充记录。`,
+        stem: `${point}相关流程中，下列判断正确的是？`,
+        correct: `应按照${base}完成必要程序和留痕，不能以口头同意替代合规要求`
+      },
+      {
+        material: `某产品运作过程中出现影响投资者判断的重要事项。相关人员认为该事项暂时不利于销售，可以等产品结束后再统一说明。`,
+        stem: `${point}相关做法主要存在什么问题？`,
+        correct: `忽视了${base}相关的信息披露、风险提示和投资者保护要求`
+      }
+    ];
+    const item = cases[seed % cases.length];
+    const result = withAnswer(item.correct || correct, pickWrongOptions(seed + 9), seed + 2);
+    return {
+      id,
+      point,
+      difficulty: "材料题",
+      material: item.material,
+      stem: item.stem,
+      options: result.options,
+      answer: result.answer,
+      explanation: `${point}在机考中常以简短业务场景出现，需要从${base}、主体责任、禁止行为和投资者保护角度判断。`,
+      trap: trap || "材料题不要被“已备案”“口头同意”“以后补充”等表述带偏，重点看是否履行法定或约定义务。"
+    };
+  }
+
+  function examizeCustomQuestion(question, index) {
+    if (index % 3 === 0) return { ...question, difficulty: "普通单选" };
+    const correctOption = question.options[question.answer];
+    if (index % 3 === 1) {
+      return {
+        ...question,
+        difficulty: "组合单选",
+        stem: `${question.point}相关说法，正确的有：\nⅠ. ${correctOption}\nⅡ. 不得承诺固定收益或以备案替代风险揭示\nⅢ. 只要投资者同意，可以省略必要说明\nⅣ. 应结合题干场景和监管要求判断`,
+        options: ["Ⅰ、Ⅱ、Ⅳ", "Ⅰ、Ⅲ", "Ⅱ、Ⅲ、Ⅳ", "Ⅰ、Ⅱ、Ⅲ、Ⅳ"],
+        answer: 0,
+        explanation: `${question.explanation} 组合题中，Ⅲ属于省略合规程序的错误表述。`,
+        trap: "组合题不要只看单个关键词，要逐项排除明显绝对化或免责化表述。"
+      };
+    }
+    return {
+      ...question,
+      difficulty: "材料题",
+      material: `某从业人员在业务办理中遇到与“${question.point}”有关的问题，并需要向投资者说明该事项的风险、边界和正确处理方式。`,
+      stem: question.stem,
+      explanation: `${question.explanation} 材料题要先判断业务场景，再回到对应考点。`
+    };
+  }
+
   function interleaveQuestionsByPoint(questions) {
     const groups = questions.reduce((acc, question) => {
       if (!acc.has(question.point)) acc.set(question.point, []);
       acc.get(question.point).push(question);
       return acc;
     }, new Map());
-    const buckets = [...groups.values()];
+    const buckets = [...groups.values()].map((bucket, index) => {
+      const offset = index % bucket.length;
+      return bucket.slice(offset).concat(bucket.slice(0, offset));
+    });
     const remaining = buckets.map((bucket) => bucket.length);
     const sequence = [];
     const total = buckets.reduce((sum, bucket) => sum + bucket.length, 0);
@@ -199,8 +293,17 @@
       }
     }
 
-    const cursors = buckets.map(() => 0);
-    return sequence.map((bucketIndex) => buckets[bucketIndex][cursors[bucketIndex]++]);
+    const usedIndexes = buckets.map(() => new Set());
+    const typeCycle = ["普通单选", "组合单选", "材料题"];
+    return sequence.map((bucketIndex, outputIndex) => {
+      const bucket = buckets[bucketIndex];
+      const used = usedIndexes[bucketIndex];
+      const desiredType = typeCycle[outputIndex % typeCycle.length];
+      let questionIndex = bucket.findIndex((question, index) => !used.has(index) && question.difficulty === desiredType);
+      if (questionIndex === -1) questionIndex = bucket.findIndex((question, index) => !used.has(index));
+      used.add(questionIndex);
+      return bucket[questionIndex];
+    });
   }
 
   const customQuestionBanks = {
@@ -591,33 +694,15 @@
       {
         id: `${prefix}-a`,
         point: section.point,
-        difficulty: level,
+        difficulty: "普通单选",
         stem: pick(directStemTemplates, seed)({ ...section, base }),
         options: direct.options,
         answer: direct.answer,
         explanation: why,
         trap
       },
-      {
-        id: `${prefix}-b`,
-        point: section.point,
-        difficulty: "场景",
-        stem: pick(scenarioStemTemplates, seed + 1)({ ...section, base }),
-        options: scenario.options,
-        answer: scenario.answer,
-        explanation: `场景题不只考记忆，还考能否把「${section.point}」落实到具体行为。正确做法应围绕${base}，同时满足合规、披露、留痕和投资者保护要求。`,
-        trap: "场景题里出现“客户同意即可”“先做后补”“保证收益”“省略流程”等表述时，要优先排除。"
-      },
-      {
-        id: `${prefix}-c`,
-        point: section.point,
-        difficulty: "易错",
-        stem: pick(errorStemTemplates, seed + 2)({ ...section, base }),
-        options: error.options,
-        answer: error.answer,
-        explanation: `易错题通常把「${section.point}」和保本承诺、职责混同、流程省略或概念边界混淆放在一起考。应回到${base}判断。`,
-        trap: "看到“完全”“必然”“无需”“只要同意即可”等绝对化表述，要优先警惕。"
-      }
+      makeComboQuestion({ id: `${prefix}-b`, point: section.point, base, level, seed, trap }),
+      makeMaterialQuestion({ id: `${prefix}-c`, point: section.point, base, level, seed, correct: errorCorrect, trap })
     ];
   }
 
@@ -634,7 +719,7 @@
           title: `第${chapterIndex}章 ${chapter.title}`,
           summary: chapter.summary,
           questions: interleaveQuestionsByPoint(
-            customQuestionBanks[`${subject.id}-c${chapterIndex}`] ||
+            customQuestionBanks[`${subject.id}-c${chapterIndex}`]?.map(examizeCustomQuestion) ||
               chapter.sections.flatMap((section, sectionOffset) =>
                 makeQuestions(subject.id, chapterIndex, chapter.title, sectionOffset + 1, section)
               )

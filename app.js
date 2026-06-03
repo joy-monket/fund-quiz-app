@@ -311,7 +311,7 @@ const subjects = window.FUND_QUIZ_SUBJECTS || [
   }
 ];
 
-const APP_VERSION = "20260603-v6";
+const APP_VERSION = "20260603-v10";
 const STORAGE_KEY = `fundQuizProgress:${APP_VERSION}`;
 const reasons = ["没记住", "概念混淆", "题干陷阱", "法规/流程不熟"];
 
@@ -464,6 +464,8 @@ function renderPractice() {
   el("progressBar").style.width = `${((session.index + 1) / session.questions.length) * 100}%`;
   el("questionDifficulty").textContent = question.difficulty;
   el("questionPoint").textContent = question.point;
+  el("questionMaterial").hidden = !question.material;
+  el("questionMaterial").textContent = question.material || "";
   el("questionText").textContent = question.stem;
   el("optionList").innerHTML = question.options.map((option, index) => {
     const classes = ["option-button"];
