@@ -65,6 +65,14 @@ https://joy-monket.github.io/fund-quiz-app/?v=20260603-fresh
 
 当前版本使用新的本地记录空间 `fundQuizProgress:20260603-fresh`，不会沿用旧版 `fundQuizProgressV1` 的错题和进度。
 
+本轮全库去模板化版本链接：
+
+```text
+https://joy-monket.github.io/fund-quiz-app/?v=20260603-v2
+```
+
+该版本使用新的本地记录空间 `fundQuizProgress:20260603-v2`。
+
 ## 题库说明
 
 题库文件是 `data-full.js`。

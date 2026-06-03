@@ -5,23 +5,129 @@
   };
 
   const mistakeTraps = {
-    "掌握": "掌握类考点要能在场景题里判断责任主体、流程顺序和禁止行为。",
-    "理解": "理解类考点不要死背标题，要能区分相邻概念和适用场景。",
-    "了解": "了解类考点抓关键词即可，注意不要把辅助概念误认为核心规则。"
+    "掌握": "掌握类考点常考责任主体、流程顺序、禁止行为和场景判断，要避免只记关键词。",
+    "理解": "理解类考点常考概念边界、相邻制度差异和适用场景，不要把相似表述混用。",
+    "了解": "了解类考点重点抓定位、作用和基本方向，通常不要求展开复杂计算或细节推导。"
   };
 
-  const distractors = [
-    "管理人可以向投资者承诺本金安全和固定收益",
-    "相关规则只适用于机构投资者，不适用于自然人",
-    "只要投资者同意，就可以不履行信息披露和风险揭示",
-    "基金业务可以脱离监管、自律规则和内部控制独立开展",
-    "销售规模优先于适当性、合规和客户利益保护",
-    "托管、估值、信息披露等职责可以完全由销售人员自行决定"
+  const wrongOptionPools = {
+    guarantee: [
+      "只要完成销售，管理人即可承诺固定收益",
+      "投资者购买后本金和收益均应由销售机构兜底",
+      "产品备案或披露完成后，即代表监管机构保证收益",
+      "历史业绩较好时，可以向投资者承诺未来业绩"
+    ],
+    disclosure: [
+      "只向大额投资者披露风险，小额投资者可以不披露",
+      "投资者签字后，管理人可以不再履行信息披露义务",
+      "为了提高效率，可以省略风险揭示和资料留痕",
+      "不利信息可以等到产品结束后再统一说明"
+    ],
+    role: [
+      "销售人员可以替代投资决策委员会作出投资决定",
+      "托管人可以直接决定基金投资组合和收益分配",
+      "投资者适当性由投资者自行判断，机构无需核验",
+      "外包服务机构可以替代管理人承担全部受托责任"
+    ],
+    process: [
+      "只要结果有利于投资者，就可以跳过规定程序",
+      "内部审批可以在业务完成后长期不补充记录",
+      "募集、投资、披露和备案之间没有先后要求",
+      "出现重大事项时，可以不报告也不更新资料"
+    ],
+    concept: [
+      "该考点只适用于银行存款，不适用于基金业务",
+      "该考点的核心是取消投资风险和市场波动",
+      "该考点意味着基金可以脱离监管规则独立运作",
+      "该考点要求所有投资者承担完全相同的投资结果"
+    ],
+    market: [
+      "一级市场是已经发行证券的集中流通市场",
+      "资本市场只交易一年以内的短期金融工具",
+      "货币市场主要交易未上市企业控制权",
+      "金融市场的价格发现功能等同于保证价格永远正确"
+    ]
+  };
+
+  const directStemTemplates = [
+    ({ point }) => `下列哪一项最符合「${point}」的基本含义？`,
+    ({ point }) => `关于「${point}」，下列理解正确的是？`,
+    ({ point }) => `学习「${point}」时，最应把握的核心是？`,
+    ({ point }) => `下列哪项属于「${point}」通常考查的内容？`,
+    ({ point }) => `从考试角度看，「${point}」最可能要求考生掌握什么？`,
+    ({ point }) => `下列关于「${point}」的表述，哪一项更准确？`,
+    ({ point }) => `围绕「${point}」，下列哪项属于正确判断？`,
+    ({ point }) => `下列哪一项与「${point}」的制度定位最一致？`
   ];
 
-  const pickDistractors = (seed, count = 3) => {
-    const start = seed % distractors.length;
-    return Array.from({ length: count }, (_, index) => distractors[(start + index) % distractors.length]);
+  const scenarioStemTemplates = [
+    ({ point }) => `某基金机构办理与「${point}」有关的业务时，较合规的做法是？`,
+    ({ point }) => `在「${point}」相关场景中，从业人员首先应避免哪类做法？`,
+    ({ point }) => `客户询问「${point}」相关安排时，销售人员的正确回应是？`,
+    ({ point }) => `某管理人在落实「${point}」要求时，下列做法更恰当的是？`,
+    ({ point }) => `如果业务流程涉及「${point}」，下列处理方式更符合规范的是？`,
+    ({ point }) => `围绕「${point}」发生争议时，判断合规性的关键依据是？`,
+    ({ point }) => `某产品运作中涉及「${point}」，管理人应重点做到什么？`,
+    ({ point }) => `在投资者保护视角下，「${point}」相关业务更应强调什么？`
+  ];
+
+  const errorStemTemplates = [
+    ({ point }) => `关于「${point}」，下列哪一项说法错误？`,
+    ({ point }) => `下列哪项最可能违反「${point}」的要求？`,
+    ({ point }) => `围绕「${point}」，哪一项属于常见误区？`,
+    ({ point }) => `下列哪种表述最容易造成对「${point}」的误解？`,
+    ({ point }) => `考查「${point}」时，哪个选项通常应被排除？`,
+    ({ point }) => `下列哪项与「${point}」的正确要求相冲突？`,
+    ({ point }) => `判断「${point}」相关选项时，最需要警惕哪种说法？`,
+    ({ point }) => `下列关于「${point}」的理解，哪一项不恰当？`
+  ];
+
+  const directCorrectTemplates = [
+    ({ base }) => base,
+    ({ base }) => `以${base}为判断重点`,
+    ({ base }) => `围绕${base}理解其制度作用`,
+    ({ base }) => `结合${base}判断主体责任和流程要求`,
+    ({ base }) => `把${base}作为区分相似概念的关键`
+  ];
+
+  const scenarioCorrectTemplates = [
+    ({ base }) => `围绕${base}履行必要程序，并保留业务记录`,
+    ({ base }) => `充分说明${base}相关风险和限制，避免误导投资者`,
+    ({ base }) => `按照${base}判断职责边界，不作收益或本金承诺`,
+    ({ base }) => `结合${base}完成适当性、披露或内部审批要求`,
+    ({ base }) => `发现异常时依据${base}及时报告、整改并留痕`
+  ];
+
+  const errorCorrectTemplates = [
+    ({ point }) => `把「${point}」理解成保本保收益安排`,
+    ({ point }) => `以销售便利为由弱化「${point}」相关程序`,
+    ({ point }) => `认为「${point}」只需要口头说明，无需记录和监督`,
+    ({ point }) => `将「${point}」与相邻概念混同，忽视适用边界`,
+    ({ point }) => `认为投资者同意后即可不执行「${point}」相关规则`
+  ];
+
+  const pick = (items, seed) => items[Math.abs(seed) % items.length];
+
+  const pickWrongOptions = (seed, count = 3) => {
+    const poolNames = Object.keys(wrongOptionPools);
+    const start = seed % poolNames.length;
+    const selected = [];
+    for (let i = 0; selected.length < count && i < poolNames.length * 2; i += 1) {
+      const pool = wrongOptionPools[poolNames[(start + i) % poolNames.length]];
+      const option = pool[(seed + i) % pool.length];
+      if (!selected.includes(option)) selected.push(option);
+    }
+    return selected;
+  };
+
+  const withAnswer = (correct, wrongs, seed) => {
+    const answer = seed % 4;
+    const options = [];
+    let wrongIndex = 0;
+    for (let index = 0; index < 4; index += 1) {
+      options.push(index === answer ? correct : wrongs[wrongIndex++]);
+    }
+    return { options, answer };
   };
 
   const customQuestionBanks = {
@@ -395,17 +501,27 @@
     const prefix = `${subjectCode}-c${chapterIndex}-q${sectionIndex}`;
     const level = section.level || "理解";
     const base = section.base || section.point;
-    const why = section.why || `${base}是本章的重要考点，考试通常会结合主体责任、流程节点或禁止行为进行考查。`;
+    const why = section.why || `「${section.point}」需要结合${base}来理解，考试可能从概念识别、职责边界、流程要求或禁止行为角度设问。`;
     const trap = section.trap || mistakeTraps[level];
-    const wrong = pickDistractors(chapterIndex * 7 + sectionIndex);
+    const seed = chapterIndex * 17 + sectionIndex * 5 + subjectCode.length;
+    const directCorrect = pick(directCorrectTemplates, seed)({ ...section, base });
+    const scenarioCorrect = pick(scenarioCorrectTemplates, seed + 2)({ ...section, base });
+    const errorCorrect = pick(errorCorrectTemplates, seed + 4)({ ...section, base });
+    const direct = withAnswer(directCorrect, pickWrongOptions(seed), seed);
+    const scenario = withAnswer(scenarioCorrect, pickWrongOptions(seed + 3), seed + 1);
+    const error = withAnswer(errorCorrect, [
+      `按${base}进行判断和执行`,
+      "保留必要记录并接受内部或外部监督",
+      "按照适当性、信息披露和风险控制要求处理业务"
+    ], seed + 2);
     return [
       {
         id: `${prefix}-a`,
         point: section.point,
         difficulty: level,
-        stem: `关于「${section.point}」，下列说法正确的是？`,
-        options: [wrong[0], `应重点把握${base}`, wrong[1], wrong[2]],
-        answer: 1,
+        stem: pick(directStemTemplates, seed)({ ...section, base }),
+        options: direct.options,
+        answer: direct.answer,
         explanation: why,
         trap
       },
@@ -413,20 +529,20 @@
         id: `${prefix}-b`,
         point: section.point,
         difficulty: "场景",
-        stem: `某从业人员在处理「${section.point}」相关业务时，最合规的做法是？`,
-        options: [wrong[1], wrong[2], `围绕${base}履行相应程序、留痕并保护投资者合法权益`, wrong[0]],
-        answer: 2,
-        explanation: `场景题通常考查能否把「${section.point}」落到具体行为上，合规做法应以规则、程序、披露和投资者保护为基础。`,
-        trap: "场景题不要被“客户同意”“行业惯例”“提高效率”等表述带偏。"
+        stem: pick(scenarioStemTemplates, seed + 1)({ ...section, base }),
+        options: scenario.options,
+        answer: scenario.answer,
+        explanation: `场景题不只考记忆，还考能否把「${section.point}」落实到具体行为。正确做法应围绕${base}，同时满足合规、披露、留痕和投资者保护要求。`,
+        trap: "场景题里出现“客户同意即可”“先做后补”“保证收益”“省略流程”等表述时，要优先排除。"
       },
       {
         id: `${prefix}-c`,
         point: section.point,
         difficulty: "易错",
-        stem: `下列哪一项最容易与「${section.point}」的正确要求相冲突？`,
-        options: [`按${base}进行判断和执行`, "保留必要记录并接受监督", wrong[3] || wrong[0], "按照适当性和信息披露要求处理投资者关系"],
-        answer: 2,
-        explanation: `与「${section.point}」相冲突的选项通常包含规避监管、弱化责任、承诺收益或跳过必要程序等问题。`,
+        stem: pick(errorStemTemplates, seed + 2)({ ...section, base }),
+        options: error.options,
+        answer: error.answer,
+        explanation: `易错题通常把「${section.point}」和保本承诺、职责混同、流程省略或概念边界混淆放在一起考。应回到${base}判断。`,
         trap: "看到“完全”“必然”“无需”“只要同意即可”等绝对化表述，要优先警惕。"
       }
     ];

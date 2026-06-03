@@ -311,7 +311,7 @@ const subjects = window.FUND_QUIZ_SUBJECTS || [
   }
 ];
 
-const APP_VERSION = "20260603-fresh";
+const APP_VERSION = "20260603-v2";
 const STORAGE_KEY = `fundQuizProgress:${APP_VERSION}`;
 const reasons = ["没记住", "概念混淆", "题干陷阱", "法规/流程不熟"];
 
