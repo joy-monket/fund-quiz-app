@@ -400,7 +400,7 @@ function renderSubjects() {
       <button class="subject-card" type="button" data-subject="${subject.id}">
         <span class="subject-code">${subject.code}</span>
         <h3>${subject.title}</h3>
-        <p class="card-meta">官方大纲版 · ${subject.chapters.length} 个章节，${questionCount} 道大纲题。后续可按同一结构扩充题库。</p>
+        <p class="card-meta">按官方大纲编写 · ${subject.chapters.length} 个章节，${questionCount} 道练习题。后续可按同一结构扩充题库。</p>
         <div class="stat-row">
           <span class="pill">已刷 ${stats.attempts}</span>
           <span class="pill">正确率 ${stats.accuracy}%</span>
