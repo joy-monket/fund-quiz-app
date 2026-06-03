@@ -55,6 +55,16 @@
 3. 不需要构建命令。
 4. 发布后分享 Netlify 生成的网址。
 
+## 全新访问链接
+
+如果之前浏览器里有旧题库缓存或旧练习记录，可以使用带版本号的链接打开：
+
+```text
+https://joy-monket.github.io/fund-quiz-app/?v=20260603-fresh
+```
+
+当前版本使用新的本地记录空间 `fundQuizProgress:20260603-fresh`，不会沿用旧版 `fundQuizProgressV1` 的错题和进度。
+
 ## 题库说明
 
 题库文件是 `data-full.js`。
